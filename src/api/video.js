@@ -13,3 +13,12 @@ export const getCategories = async () => {
   // 기본 URL 이 instance에서 설정 되있기 때문에 그 이후만 치면 된다.
   return await instance.get("category");
 };
+
+export const addVideo = async (data) => {
+  //  video 주소로 들어온 data(form)를 반환
+  return await instance.post("video", data);
+};
+
+export const getVideos = async () => {
+  return await instance.get("video");
+};

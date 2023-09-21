@@ -13,7 +13,7 @@ import { faBagShopping } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 
 // export 속성이 달려있는 컴포넌트는 이 방식으로 가져온다.
-import { getCategories } from "../api/video";
+import { getCategories, getVideos } from "../api/video";
 
 // 태그에 대한 스타일 적용 (``백틱사용)
 const Test = styled.div`
@@ -51,6 +51,7 @@ const StyledAside = styled.aside`
     padding: 10px;
     border-radius: 5px;
     margin: 10px;
+    color: black;
     &:hover {
       background-color: #eee;
     }
@@ -87,6 +88,7 @@ const MainContent = styled.div`
       border-radius: 5px;
       line-height: 56px;
       margin: 6px;
+      color: black;
 
       &.active {
         background-color: black;
@@ -236,6 +238,7 @@ const StyledMain = styled.main`
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
+  const [videos, setVideos] = useState([]);
 
   // async ~ await으로 받았으면 async ~ await에 담아줘야 한다.
   const categoriesAPI = async () => {
@@ -243,8 +246,15 @@ const Home = () => {
     setCategories(result.data);
   };
 
+  const videosAPI = async () => {
+    const result = await getVideos();
+    console.log(result.data);
+    setVideos(result.data);
+  };
+
   useEffect(() => {
     categoriesAPI();
+    videosAPI();
 
     // 카테고리 전체조회 결과값
     // fetch("http://localhost:8080/api/category")
@@ -317,153 +327,44 @@ const Home = () => {
         </nav>
 
         <section>
-          {/* <a href="#" className="video-content">
-            <video
-              width="100%"
-              poster="resources/thumbnail.jpg"
-              autoplay
-              loop
-              controls
-            >
-              <source src="resources/video (1).mp4" type="video/mp4" />
-            </video>
+          {videos.map((video) => (
+            <a href="#" className="video-content" key={video.videoCode}>
+              <video
+                width="100%"
+                poster={"/upload/" + video.videoPhoto}
+                // autoplay // 리액트에서는 카멜기법으로!!
+                autoPlay
+                loop
+                controls
+              >
+                {/* 리액트는 절대경로(local)로 접근이 불가능하다. 
+                  asset(절대경로)이 불가능하다면 public폴더의 upload(상대경로)에서 접근을 해보자
+                  (주의!! public의 upload에서 파일을 가지고 오고 싶다면 
+                  서버단에서 파일저장 경로를 수정해줘야 됨)*/}
+                <source src={"/upload/" + video.videoUrl} type="video/mp4" />
+              </video>
 
-            <div className="video-summary">
-              <img src="resources//thumbnail.jpg" alt="채널이미지" />
+              <div className="video-summary">
+                <img
+                  src={"/upload/" + video.channel.channelPhoto}
+                  alt="채널이미지"
+                />
 
-              <div className="video-desc">
-                <h3>부산촌놈 마지막화...!</h3>
+                <div className="video-desc">
+                  <h3>{video.videoTitle}</h3>
 
-                <p>tvN</p>
+                  <p>{video.channel.channelName}</p>
 
-                <p>
-                  조회수
-                  <span> 9.1만</span>
-                  회ㆍ
-                  <span>1일</span>전
-                </p>
+                  <p>
+                    조회수
+                    <span>{video.videoViews}</span>
+                    회ㆍ
+                    <span>{video.videoDate}</span>전
+                  </p>
+                </div>
               </div>
-            </div>
-          </a>
-
-          <a href="#" className="video-content">
-            <video
-              width="100%"
-              poster="resources/thumbnail.jpg"
-              autoplay
-              loop
-              controls
-            >
-              <source src="resources/video (1).mp4" type="video/mp4" />
-            </video>
-
-            <div className="video-summary">
-              <img src="resources//thumbnail.jpg" alt="채널이미지" />
-
-              <div className="video-desc">
-                <h3>
-                  (1시간) 말년 병장 대뇌 전두엽까지 퍼진 꾀병! 멀리서 보면 희극,
-                  가까이서 보면 비극인 말년에 유격 훈련🤣
-                </h3>
-
-                <p>tvN</p>
-
-                <p>
-                  조회수
-                  <span> 9.1만</span>
-                  회ㆍ
-                  <span>1일</span>전
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <a href="#" className="video-content">
-            <video
-              width="100%"
-              poster="resources/thumbnail.jpg"
-              autoplay
-              loop
-              controls
-            >
-              <source src="resources/video (1).mp4" type="video/mp4" />
-            </video>
-
-            <div className="video-summary">
-              <img src="resources//thumbnail.jpg" alt="채널이미지" />
-
-              <div className="video-desc">
-                <h3>부산촌놈 마지막화...!</h3>
-
-                <p>tvN</p>
-
-                <p>
-                  조회수
-                  <span> 9.1만</span>
-                  회ㆍ
-                  <span>1일</span>전
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <a href="#" className="video-content">
-            <video
-              width="100%"
-              poster="resources/thumbnail.jpg"
-              autoplay
-              loop
-              controls
-            >
-              <source src="resources/video (1).mp4" type="video/mp4" />
-            </video>
-
-            <div className="video-summary">
-              <img src="resources//thumbnail.jpg" alt="채널이미지" />
-
-              <div className="video-desc">
-                <h3>부산촌놈 마지막화...!</h3>
-
-                <p>tvN</p>
-
-                <p>
-                  조회수
-                  <span> 9.1만</span>
-                  회ㆍ
-                  <span>1일</span>전
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <a href="#" className="video-content">
-            <video
-              width="100%"
-              poster="resources/thumbnail.jpg"
-              autoplay
-              loop
-              controls
-            >
-              <source src="resources/video (1).mp4" type="video/mp4" />
-            </video>
-
-            <div className="video-summary">
-              <img src="resources//thumbnail.jpg" alt="채널이미지" />
-
-              <div className="video-desc">
-                <h3>부산촌놈 마지막화...!</h3>
-
-                <p>tvN</p>
-
-                <p>
-                  조회수
-                  <span> 9.1만</span>
-                  회ㆍ
-                  <span>1일</span>전
-                </p>
-              </div>
-            </div>
-          </a> */}
+            </a>
+          ))}
         </section>
       </MainContent>
     </StyledMain>
