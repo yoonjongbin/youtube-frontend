@@ -15,6 +15,9 @@ import { useEffect, useState } from "react";
 // export 속성이 달려있는 컴포넌트는 이 방식으로 가져온다.
 import { getCategories, getVideos } from "../api/video";
 
+//
+import { useInView } from "react-intersection-observer";
+
 // 태그에 대한 스타일 적용 (``백틱사용)
 const Test = styled.div`
   background-color: black;
@@ -239,6 +242,10 @@ const StyledMain = styled.main`
 const Home = () => {
   const [categories, setCategories] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [category, setCategory] = useState(null);
+
+  const [ref, inView] = useInView();
 
   // async ~ await으로 받았으면 async ~ await에 담아줘야 한다.
   const categoriesAPI = async () => {
@@ -247,8 +254,16 @@ const Home = () => {
   };
 
   const videosAPI = async () => {
-    const result = await getVideos();
+    // db랑 연결해야하는 부분! -> Spring + MyBatis(동적쿼리) / Spring Boot + JPA (JPQL, @Query)
+    // --> QueryDSL
+
+    const result = await getVideos(page, category);
     console.log(result.data);
+    setVideos([...videos, ...result.data]);
+  };
+
+  const categoryFilterAPI = async () => {
+    const result = await getVideos(page, category);
     setVideos(result.data);
   };
 
@@ -264,6 +279,31 @@ const Home = () => {
     //     setCategories(json);
     //   });
   }, []);
+
+  useEffect(() => {
+    if (inView) {
+      console.log(`${inView} : 무한 스크롤 요청이 들어가야하는 부분!`);
+      videosAPI();
+      setPage(page + 1);
+    }
+  }, [inView]);
+
+  useEffect(() => {
+    if (category != null) {
+      console.log(category);
+      categoryFilterAPI();
+    }
+  }, [category]);
+
+  const filterCategory = (e) => {
+    e.preventDefault();
+    // console.log(e.target.href);
+    const href = e.target.href.split("/");
+    // console.log(href[href.length - 1]);
+    setCategory(parseInt(href[href.length - 1]));
+    // console.log(category);
+    setPage(1);
+  };
 
   return (
     <StyledMain>
@@ -320,15 +360,21 @@ const Home = () => {
           {/* <a href="#">쇼핑</a>
           <a href="#">음악</a> */}
           {categories.map((category) => (
-            <a href="#" key={category.categoryCode}>
+            <a
+              href={category.categoryCode}
+              onClick={filterCategory}
+              key={category.categoryCode}
+            >
               {category.categoryName}
             </a>
           ))}
         </nav>
 
         <section>
+          {/* console.log({videos}); */}
           {videos.map((video) => (
             <a href="#" className="video-content" key={video.videoCode}>
+              {video.videoCode}
               <video
                 width="100%"
                 poster={"/upload/" + video.videoPhoto}
@@ -365,6 +411,7 @@ const Home = () => {
               </div>
             </a>
           ))}
+          <div ref={ref}></div>
         </section>
       </MainContent>
     </StyledMain>

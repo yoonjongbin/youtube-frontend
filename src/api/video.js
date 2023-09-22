@@ -19,6 +19,10 @@ export const addVideo = async (data) => {
   return await instance.post("video", data);
 };
 
-export const getVideos = async () => {
-  return await instance.get("video");
+export const getVideos = async (page, category) => {
+  let url = `video?page=${page}`;
+  if (category !== null) {
+    url = `video?page=${page}&category=${category}`;
+  }
+  return await instance.get(url);
 };
